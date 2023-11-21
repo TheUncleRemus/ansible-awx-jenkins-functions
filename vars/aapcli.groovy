@@ -1,7 +1,7 @@
 def performGetResourceID(Closure c, String id, String error) {
     /**
-    * This method give a closure, call it
-    **/
+     * This method give a closure, call it
+     */
     def (code, body) = c.call()
     json = utils.readJson(body)
     resourceID = getResourceID(json, id)
@@ -14,21 +14,20 @@ def performGetResourceID(Closure c, String id, String error) {
 
 def headers() {
     /**
-    * This method prepare headere list
-    **/
-    return 
-        [
-            "Authorization" : "Bearer " + "${env.TOWER_AUTH_TOKEN}",
-            "Accept": "application/json",
-            "User-Agent": "groovy-2.4.4",
-            "Content-Type": "application/json"
-        ]
+     * This method prepare header list
+     */
+    return
+    [
+            "Authorization": "Bearer " + "${env.TOWER_AUTH_TOKEN}",
+            "Accept"       : "application/json",
+            "Content-Type" : "application/json"
+    ]
 }
 
 def jobTemplateBody(inventoryID, projectID, jobTemplateName, jobTemplateDescription) {
     /**
-    * This represent a body request for job_template creation API
-    **/
+     * This represent a body request for job_template creation API
+     */
     return """
         {
             "name": "$jobTemplateName",
@@ -45,28 +44,17 @@ def jobTemplateBody(inventoryID, projectID, jobTemplateName, jobTemplateDescript
     """
 }
 
-def jobTemplateLaunchBody(targetEnvironment, hostGroups, extraVars, composeBranch) {
+def jobTemplateLaunchBody(hostGroups, extraVars) {
     /**
-    * This represent a body request for job_template launch API
-    **/
+     * This represent a sample of the body request for job_template launch API
+     */
     return """
         {
             "extra_vars": {
-              "owner": "${env.TOWER_JOB_TEMPLATE_EXTRAVARS_OWNER}",
-              "delivery_environment": "$targetEnvironment",
-              "mvp_repository_url": "${env.COMPOSE_REPO_URL_SSH}",
-              "mvp_repository_branch": "$composeBranch",
               "hosts_group": "${hostGroups}",
-              "devops_script_url": "${env.DEVOPS_SCRIPT_REPO_URL_SSH}",
-              "gitlab_token": "${env.GITLAB_AUTH_TOKEN}",
-              "gitlab_registry": "${env.GITLAB_DOCKER_REGISTRY}",
-              "gitlab_user": "${env.GITLAB_USER}",
-              "env_dict_per_sector": "${extraVars.extraData.env_file}",
               "metadata": {
                 "jenkins_build": "${BUILD_NUMBER}",
-                "commit_author": "${extraVars.metadata.commit_author}",
-                "deployed_services": "${extraVars.metadata.deployed_services}",
-                "sectors_to_deploy": "${extraVars.metadata.sectors_to_deploy}"
+                "commit_author": "${extraVars.metadata.commit_author}"
               }
             }
         }
@@ -75,8 +63,8 @@ def jobTemplateLaunchBody(targetEnvironment, hostGroups, extraVars, composeBranc
 
 def credentialBody(credentialID) {
     /**
-    * This represent a body request to link credential with job_template 
-    **/
+     * This represent a body request to link credential with job_template
+     */
     return """
         {
             "id": $credentialID
@@ -86,10 +74,10 @@ def credentialBody(credentialID) {
 
 def getRequest(connection) {
     /**
-    * This method perform a GET request 
-    **/
+     * This method perform a GET request
+     */
     headers().keySet().each {
-      connection.setRequestProperty(it, headers().get(it)) 
+        connection.setRequestProperty(it, headers().get(it))
     }
     def (code, response) = [connection.responseCode, connection.inputStream.text]
     connection = null
@@ -98,10 +86,10 @@ def getRequest(connection) {
 
 def postRequest(connection, body) {
     /**
-    * This method perform a POST request 
-    **/
+     * This method perform a POST request
+     */
     headers().keySet().each {
-        connection.setRequestProperty(it, headers().get(it)) 
+        connection.setRequestProperty(it, headers().get(it))
     }
     connection.setRequestMethod("POST")
     connection.doOutput = true
@@ -111,12 +99,12 @@ def postRequest(connection, body) {
     return [code, response]
 }
 
-def deletetRequest(connection) {
+def deleteRequest(connection) {
     /**
-    * This method perform a DELETE request 
-    **/
+     * This method perform a DELETE request
+     */
     headers().keySet().each {
-      connection.setRequestProperty(it, headers().get(it)) 
+        connection.setRequestProperty(it, headers().get(it))
     }
     connection.setRequestMethod("DELETE")
     def code = connection.responseCode
@@ -126,9 +114,9 @@ def deletetRequest(connection) {
 
 def getResourceID(list, resourceName) {
     /**
-    * Retrieve a resource ID if exists, otherwise return -1
-    **/
-    resource = list.results.find {r ->
+     * Retrieve a resource ID if exists, otherwise return -1
+     */
+    resource = list.results.find { r ->
         r.name == resourceName
     }
     if (resource == null) {
@@ -140,7 +128,7 @@ def getResourceID(list, resourceName) {
 def getOrganizationList() {
     /**
      * This method get an Organization json object from Tower, by name-id
-    **/
+     */
     url = env.TOWER_API_BASE_URL + "/organizations/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
@@ -148,17 +136,17 @@ def getOrganizationList() {
 
 def getJobTemplateList() {
     /**
-    * This method return a list of job_templates
-    **/
-    url = env.TOWER_API_BASE_URL + "/job_templates/"   
+     * This method return a list of job_templates
+     */
+    url = env.TOWER_API_BASE_URL + "/job_templates/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
 }
 
 def getProjectList() {
-     /**
+    /**
      * This method return a project list stored in ansible tower
-     **/
+     */
     url = env.TOWER_API_BASE_URL + "/projects/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
@@ -166,8 +154,8 @@ def getProjectList() {
 
 def getInventoryList() {
     /**
-    * This method return a inventories list in stored in ansible tower
-    **/
+     * This method return a inventories list in stored in ansible tower
+     */
     url = env.TOWER_API_BASE_URL + "/inventories/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
@@ -175,8 +163,8 @@ def getInventoryList() {
 
 def postJobTemplate(body) {
     /**
-    * This method create a Job template 
-    **/
+     * This method create a Job template
+     */
     url = env.TOWER_API_BASE_URL + "/job_templates/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return postRequest(connection, body)
@@ -185,16 +173,16 @@ def postJobTemplate(body) {
 def getJobTemplate(name) {
     /**
      * This method get an JobTemplate json object from Tower, by job id/name
-    **/
-    url = env.TOWER_API_BASE_URL + "/job_templates/" + name + "/"   
+     */
+    url = env.TOWER_API_BASE_URL + "/job_templates/" + name + "/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
 }
 
 def getCredentialList() {
     /**
-    * This method return a credentials list stored in ansible tower
-    **/
+     * This method return a credentials list stored in ansible tower
+     */
     url = env.TOWER_API_BASE_URL + "/credentials/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return getRequest(connection)
@@ -202,8 +190,8 @@ def getCredentialList() {
 
 def linkCredentialToJobTemplate(body, jobTemplateID) {
     /**
-    * This method link a credential to Job Template
-    **/
+     * This method link a credential to Job Template
+     */
     url = env.TOWER_API_BASE_URL + "/job_templates/" + jobTemplateID + "/" + "credentials/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return postRequest(connection, body)
@@ -211,17 +199,17 @@ def linkCredentialToJobTemplate(body, jobTemplateID) {
 
 def launchJobTemplate(id, body) {
     /**
-    * This method launch a job_template with extra_vars
-    **/
+     * This method launch a job_template with extra_vars
+     */
     url = env.TOWER_API_BASE_URL + "/job_templates/" + id + "/" + "launch/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return postRequest(connection, body)
 }
 
 def rollbackJobTemplateCreation(id) {
-    /*
+    /**
     * This method delete a job_template 
-    **/
+    */
     url = env.TOWER_API_BASE_URL + "/job_templates/" + id + "/"
     def connection = new URL(url).openConnection() as HttpURLConnection
     return deletetRequest(connection)
