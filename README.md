@@ -17,3 +17,7 @@ def (organizationListCode, organizationID) = tower.performGetResourceID({
 ```
 
 If you want you can integrate this functions into your Jenkins shared library.
+
+## the goal 
+
+This repository facilitates integration between a Jenkins CI/CD stack and infrastructure managed as code using Ansible (CasC).
