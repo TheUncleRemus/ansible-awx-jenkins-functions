@@ -15,3 +15,5 @@ def (organizationListCode, organizationID) = tower.performGetResourceID({
         " Organization + ${env.TOWER_ORGANIZATION_ID} not found "
     )
 ```
+
+If you want you can integrate this functions into your Jenkins shared library.
